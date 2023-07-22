@@ -1,0 +1,35 @@
+{
+  "name": "al_mualim",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor/app": "5.0.6",
+    "@capacitor/cli": "^5.2.1",
+    "@capacitor/core": "5.2.1",
+    "@capacitor/haptics": "5.0.6",
+    "@capacitor/keyboard": "5.0.6",
+    "@capacitor/status-bar": "5.0.6",
+    "@ionic/vue": "^7.0.0",
+    "@ionic/vue-router": "^7.0.0",
+    "@types/animejs": "^3.1.7",
+    "@vueuse/core": "^10.2.1",
+    "animejs": "^3.2.1",
+    "ionicons": "^7.0.0",
+    "pinia": "^2.1.4",
+    "swiper": "^10.0.4",
+    "vue": "^3.3.4",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.0",
+    "vue-tsc": "^1.8.3"
+  }
+}

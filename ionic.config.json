@@ -1,0 +1,7 @@
+{
+  "name": "al_mualim",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
