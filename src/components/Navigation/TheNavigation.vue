@@ -1,15 +1,11 @@
 <template>
   <nav class="nav">
-    <div ref="app" class="app full absolute"><slot></slot></div>
+    <div ref="app" class="app full absolute">
+      <slot></slot>
+    </div>
     <div class="nav-content absolute full">
       <NavIcon @click="handleNavToggleClick()" class="toggle flex-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="50"
-          height="35"
-          fill="none"
-          viewBox="0 0 50 35"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="35" fill="none" viewBox="0 0 50 35">
           <rect width="29" height="3" x="10" y="9" fill="#948E8E" rx="1.5" />
           <rect width="29" height="3" x="10" y="9" fill="#948E8E" rx="1.5" />
           <rect width="22" height="3" x="10" y="25" fill="#948E8E" rx="1.5" />
@@ -20,17 +16,15 @@
       </NavIcon>
     </div>
     <div class="nav-options full relative">
-      <NavigationOption
-        :option="new NavigationOptionClass('title', 'content')"
-      ></NavigationOption>
+      <NavigationOption :option="new NavigationOptionClass('title', 'content')"></NavigationOption>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { Ref, ref } from "vue";
-import NavIcon from "../icons/VIcon.vue";
 import anime from "animejs";
+import NavIcon from '../Icons/VIcon.vue'
 const app = ref() as Ref<HTMLDivElement>;
 const isNavigation = ref(false);
 import NavigationOption from "../Navigation/NavigationOption/NavigationOption.vue";
@@ -43,19 +37,17 @@ function handleNavToggleClick() {
   closeNav();
 }
 function openNav() {
-  console.log(app.value);
-
   anime({
     targets: app.value,
     translateX: "50%",
     scale: 0.9,
+    duration: 550,
+    easing: "easeOutBack",
   });
   app.value.classList.add("nav-open-app");
   isNavigation.value = true;
 }
 function closeNav() {
-  console.log(app.value);
-
   anime({
     targets: app.value,
     translateX: 0,
@@ -74,7 +66,9 @@ function closeNav() {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 100%;
+  overflow: hidden;
 }
+
 .nav-content {
   top: 0;
 }
@@ -87,8 +81,9 @@ function closeNav() {
   display: flex;
   justify-content: space-around;
 }
+
 .toggle {
-  position: absolute;
+  position: fixed;
   width: 55px;
   height: 55px;
   z-index: 3;
@@ -97,6 +92,7 @@ function closeNav() {
   box-shadow: var(--shadow);
   border-radius: var(--radius);
 }
+
 .app {
   z-index: 2;
   display: inline-block;

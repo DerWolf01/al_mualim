@@ -1,29 +1,20 @@
 import { defineStore } from "pinia";
-import { useStorage } from "@vueuse/core";
-import { IStudent, Student, Students } from "../models/students";
+import { IPerson, PersonModel, Role, Persons } from "../models/person_model/person_model";
 
 export const useStudentsStore = defineStore({
-  id: "students",
+  id: "persons",
   state: () => ({
-    students: useStorage<Map<string, IStudent>>("students", new Map()),
+    persons: [] as PersonModel[],
   }),
   getters: {
-    getStudents(state): Student[] {
-      const res: Student[] = [];
-      const students = state.students as Students;
-      for (let s in students) {
-        const student = students.get(s);
-        if (!student) {
-          continue;
-        }
-        res.push(new Student(student));
-      }
-      return res;
+    async getStudents(state): Promise<PersonModel[]> {
+      state.persons = await PersonModel.studentsFromServer();
+      return state.persons;
     },
   },
   actions: {
-    addStudent(student: IStudent | Student) {
-      this.students.set(Date.now().toString(), student);
+    addStudent(student: PersonModel) {
+      this.persons.push(student);
     },
   },
 });

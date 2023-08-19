@@ -1,36 +1,168 @@
 <template>
   <div class="page full relative">
     <div class="header flex-center">
-      <header>{{ pageTitle }}</header>
+      <header>{{ title }}</header>
     </div>
 
-    <div class="content full relative">
+    <form class="content full relative">
       <div class="options-bar full">
-        <div class="page-title">Title</div>
+        <div class="page-title">{{ title }}</div>
         <div class="options">
-          <VIcon class="option"> <IonIcon :icon="add"> </IonIcon></VIcon>
-
-          <VIcon class="option"><IonIcon :icon="search"> </IonIcon></VIcon>
+          <VPageOption class="option-item" v-for="o in options" :key="o.icon" :data="o"></VPageOption>
         </div>
       </div>
       <div class="items full relative flex-center">
-        <VCard v-for="(item, i) in items" :key="i" :card="item"></VCard>
+        <TransitionGroup name="main-cards" @enter="(el) => {
+          anime({ targets: el, translateX: ['100%', 0], scale: [0.1, 1], delay: delay * 75 });
+          delay += 1
+        }
+          ">
+          <VCard v-for="(item, i) in items || []" :key="i" :card="(item as (Card | InputCardConf))"
+            class-names="card-item">
+          </VCard>
+        </TransitionGroup>
       </div>
-    </div>
+      <VLoadingAnimation v-if="is_loading"></VLoadingAnimation>
+      <div v-if="items.length < 1 && !is_loading" class="empty relative flex-center">
+        <span>Nothing here</span>
+        <img src="../../assets/empty.svg" alt="" />
+      </div>
+    </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { IonIcon } from "@ionic/vue";
-import { add, search } from "ionicons/icons";
-import FancyRipple from "../FancyRipple/FancyRipple.vue";
-import VIcon from "@components/Icons/VIcon.vue";
-import PageRouter from "./page_router";
-import { computed } from "vue";
+import { PageRouter } from "../../page_router/page_router";
+import { Page } from "../../page_router/page";
+import VPageOption from "../Page/option/VPageOption.vue";
+//@ts-ignore
+import VIcon from "../icons/VIcon.vue";
+import { ComputedRef, Ref, computed, onMounted, ref } from "vue";
 import VCard from "../Card/VCard.vue";
 
-const pageTitle = computed(() => PageRouter.getPageTitle());
-const items = computed(() => PageRouter.getItems());
+import anime, { EasingOptions } from "animejs";
+import { PageOption } from "../Page/option/page_option";
+import { InputCardConf } from "../Cards/input_card/input_card";
+import Card from "../Card/card_class";
+import VLoadingAnimation from "../LoadingAnimation/VLoadingAnimation.vue";
+import { Items } from "../../page_router/types";
+// title
+const title = computed(() => title_ref.value);
+const title_ref = ref("");
+
+// options
+const options_ref: Ref<PageOption[]> = ref([]);
+const options = computed(() => options_ref.value);
+
+// card items
+const items_ref: Ref<Array<Card | InputCardConf>> = ref([]);
+const items: ComputedRef<Items> = computed(() => items_ref.value);
+
+const is_loading = ref(true);
+
+const delay = ref(0)
+
+onMounted(async () => {
+  const router = await PageRouter.init("Courses");
+
+  setValues(router.page);
+  router.addEventListener("afterChange", async (p) => {
+    await setValues(p);
+  });
+});
+
+async function setValues(page: Page) {
+  setTitle(page.title);
+  setOptions(page.getOptions());
+  setItems(await page.getItems());
+}
+const duration = 1250;
+
+function setTitle(title: string) {
+  const duration = 350;
+  const easing = "easeInOutCirc";
+  const header = document.querySelector(".header");
+  const page_title = document.querySelector(".page-title");
+
+  anime({ targets: [header, page_title], opacity: 0, duration, easing });
+  setTimeout(() => {
+    title_ref.value = title;
+    anime({ targets: [header, page_title], opacity: 1, easing });
+  }, duration);
+}
+function setOptions(items: PageOption[]) {
+  const options = Array.from(
+    document.getElementsByClassName("option-item")
+  ).reverse();
+
+  let i = 0;
+  const duration = 350;
+  const easing: EasingOptions = "easeOutBack";
+  for (let o of options) {
+    anime({ targets: o, scale: 0, duration, delay: i, easing });
+    i += 75;
+  }
+  setTimeout(() => {
+    // for (let i = 0; i < options_ref.value.length; i++) {
+    //   options_ref.value.splice(i, 1);
+    // }
+    options_ref.value = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      options_ref.value[i] = item;
+    }
+    const options = document.getElementsByClassName("option-item");
+
+    let i = 0;
+    for (let o of options) {
+      anime({
+        targets: o,
+        scale: 1,
+        opacity: 1,
+        duration,
+        easing,
+        delay: i,
+      });
+      i += 105;
+    }
+  }, duration);
+}
+function setItems(items: Items) {
+  const cards = document.getElementsByClassName("card-item");
+  let delay = 0
+  for (let c of cards) {
+    anime({ targets: c, translateX: "-135%", scale: 0, duration, delay });
+    delay += 75
+  }
+
+  if (cards.length < 1 && !is_loading.value) {
+    const empty = document.querySelector(".empty");
+    if (empty) {
+      anime({ targets: empty, opacity: 0, easing: 'easeOutSine' })
+    };
+  } else if (cards.length < 1 && is_loading.value) {
+    const loadingEl = document.querySelector(".loading-animation");
+    anime({ targets: loadingEl, opacity: 0, easing: 'easeOutSine' });
+  }
+
+  setTimeout(() => {
+
+    // for (let i = 0; i < items_ref.value.length; i++) {
+    //   items_ref.value.splice(i, 1);
+    // }
+    items_ref.value = []; is_loading.value = true;
+    let delay = 0;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      item.classNames = `delay-${delay}`;
+      //@ts-ignore
+      items_ref.value.push(item);
+      delay += 35;
+    }
+    is_loading.value = false;
+  }, duration);
+}
 </script>
 
 <style scoped>
@@ -62,16 +194,13 @@ const items = computed(() => PageRouter.getItems());
   justify-content: space-between;
   height: 15%;
 }
+
 .options {
   display: flex;
   gap: 15px;
   padding: 13px 19px;
 }
-.option {
-  width: 35px;
-  height: 35px;
-  box-shadow: var(--shadow);
-}
+
 .page-title {
   padding: 13px 19px;
 }
@@ -81,8 +210,31 @@ const items = computed(() => PageRouter.getItems());
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  /* display: grid;
+  grid-template-columns: repeat(auto,45px); */
   width: 100%;
-  gap: 19px;
+  gap: 45px;
+  -moz-transition: height 1s ease-in-out, left 1.5s ease-in-out;
+  -webkit-transition: height 1s ease-in-out, left 1.5s ease-in-out;
+  -moz-transition: height 1s ease-in-out, left 1.5s ease-in-out;
+  -o-transition: height 1s ease-in-out, left 1.5s ease-in-out;
+  transition: height 1s ease-in-out, left 1.5s ease-in-out;
 }
 
+.empty {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+  color: grey;
+  flex-direction: column;
+}
+
+.empty img {
+  width: 100%;
+  height: 35%;
+  object-fit: contain;
+}
 </style>

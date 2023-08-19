@@ -3,7 +3,7 @@
 </template>
 <script setup lang="ts">
 import Card from "../../Card/card_class";
-import VCard from "@components/Card/VCard.vue";
+import VCard from "../../Card/VCard.vue";
 // import FancyRipple from "../../FancyRipple/FancyRipple.vue";
 import { NavigationOptionClass } from "./navigation_option";
 

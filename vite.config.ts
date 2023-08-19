@@ -1,11 +1,10 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
-// https://vitejs.dev/config/
-
+import typescript from "@rollup/plugin-typescript";
+import ttypescript from "ttypescript";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
@@ -14,5 +13,6 @@ export default defineConfig({
       "@components": path.resolve(__dirname, "./src/components"),
     },
   },
-  plugins: [vue()],
+
+  plugins: [vue(), ],
 });

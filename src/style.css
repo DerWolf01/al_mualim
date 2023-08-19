@@ -1,3 +1,4 @@
+html,
 #app {
   height: 100vh;
   width: 100vw;
@@ -5,9 +6,7 @@
   position: relative;
 }
 
-body {
-  margin: 0 !important;
-}
+
 .absolute {
   position: absolute;
   top: 0;
@@ -21,6 +20,9 @@ body {
   height: 100%;
 }
 
+.full-width {
+  width: 100%;
+}
 .flex-center {
   display: flex;
   justify-content: center;

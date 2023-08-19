@@ -24,7 +24,7 @@ import anime from "animejs";
 import Props from "./props";
 const rippleRef = ref();
 const handleMouseDown = (event: MouseEvent) => {
-  console.log("mouse down");
+
   const ripple = rippleRef.value;
   const target = event.currentTarget;
   if (ripple && target instanceof HTMLElement) {
@@ -64,7 +64,7 @@ function rippleOut(): void {
 .fancyripple {
   position: relative;
   height: 100%;
-  width: 100%;
+  width: inherit;
 
   /* overflow: hidden; */
 }
@@ -74,7 +74,8 @@ function rippleOut(): void {
   overflow: hidden !important;
   height: 100%;
   width: 100%;
-
+  z-index: 0;
+  pointer-events: none;
   top: 0;
   left: 0;
   border-radius: inherit;
