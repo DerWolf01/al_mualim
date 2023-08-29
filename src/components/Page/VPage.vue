@@ -8,23 +8,57 @@
       <div class="options-bar full">
         <div class="page-title">{{ title }}</div>
         <div class="options">
-          <VPageOption class="option-item" v-for="o in options" :key="o.icon" :data="o"></VPageOption>
+          <TransitionGroup @enter="(o) => {
+            options_delay++
+            anime({
+              targets: o,
+              scale: [.1, 1],
+              opacity: 1,
+              duration: 311,
+              easing: 'easeOutBack',
+              delay: options_delay,
+            });
+
+          }">
+            <VPageOption v-for=" o  in  options " :key="o.icon.toString()" :data="o"></VPageOption>
+          </TransitionGroup>
+
         </div>
       </div>
-      <div class="items full relative flex-center">
-        <TransitionGroup name="main-cards" @enter="(el) => {
-          anime({ targets: el, translateX: ['100%', 0], scale: [0.1, 1], delay: delay * 75 });
-          delay += 1
-        }
-          ">
-          <VCard v-for="(item, i) in items || []" :key="i" :card="(item as (Card | InputCardConf))"
+
+      <div v-show="!is_loading && !is_empty" class="items full relative flex-center">
+
+
+
+
+        <div v-for="key of Object.keys(items)" :key="key" class="main-cards-row full relative ">
+          <Transition name="main-cards-headers" @enter="(el) => {
+            anime({ targets: el, opacity: [0, 1], duration: 1333, delay: delay * 75 });
+            delay += 1
+          }
+            ">
+            <div :key="key" v-show="key != 'none'" class="main-cards-row-header header"><span>{{ key }}</span></div>
+          </Transition>
+          <VCard v-if="items[key].length < 1" :delay="delay"
+            :card="new Card({ title: '', icon: new Icon('warning'), content: 'Keine Daten Vorhanden' })"
             class-names="card-item">
+
           </VCard>
-        </TransitionGroup>
+          <TransitionGroup  name="main-cards" @enter="(el) => {
+            anime({ targets: el, translateX: ['125%', '0%'], delay: delay * 55 });
+            delay += 1
+          }
+            ">
+
+            <VCard v-for="( item, i ) in  items[key]  " :key="i" :delay="delay" :card="item" class-names="card-item">
+
+            </VCard>
+          </TransitionGroup>
+        </div>
       </div>
       <VLoadingAnimation v-if="is_loading"></VLoadingAnimation>
-      <div v-if="items.length < 1 && !is_loading" class="empty relative flex-center">
-        <span>Nothing here</span>
+      <div v-if="is_empty" class="empty relative flex-center">
+        <span>Keine Daten vorhanden</span>
         <img src="../../assets/empty.svg" alt="" />
       </div>
     </form>
@@ -46,6 +80,7 @@ import { InputCardConf } from "../Cards/input_card/input_card";
 import Card from "../Card/card_class";
 import VLoadingAnimation from "../LoadingAnimation/VLoadingAnimation.vue";
 import { Items } from "../../page_router/types";
+import { Icon } from "../Icons/types";
 // title
 const title = computed(() => title_ref.value);
 const title_ref = ref("");
@@ -55,18 +90,20 @@ const options_ref: Ref<PageOption[]> = ref([]);
 const options = computed(() => options_ref.value);
 
 // card items
-const items_ref: Ref<Array<Card | InputCardConf>> = ref([]);
+const items_ref: Ref<Items> = ref({});
 const items: ComputedRef<Items> = computed(() => items_ref.value);
 
 const is_loading = ref(true);
-
+const is_empty = ref(false)
 const delay = ref(0)
 
 onMounted(async () => {
   const router = await PageRouter.init("Courses");
-
-  setValues(router.page);
+  const page = router.page
+  await setValues(page);
   router.addEventListener("afterChange", async (p) => {
+    // console.log('items')
+    // console.log(await p.getItems())
     await setValues(p);
   });
 });
@@ -74,10 +111,11 @@ onMounted(async () => {
 async function setValues(page: Page) {
   setTitle(page.title);
   setOptions(page.getOptions());
-  setItems(await page.getItems());
-}
-const duration = 1250;
+  setItems(page.items);
 
+}
+const duration = 750;
+const options_delay = ref(0)
 function setTitle(title: string) {
   const duration = 350;
   const easing = "easeInOutCirc";
@@ -96,39 +134,49 @@ function setOptions(items: PageOption[]) {
   ).reverse();
 
   let i = 0;
-  const duration = 350;
+
   const easing: EasingOptions = "easeOutBack";
   for (let o of options) {
     anime({ targets: o, scale: 0, duration, delay: i, easing });
     i += 75;
   }
+
   setTimeout(() => {
-    // for (let i = 0; i < options_ref.value.length; i++) {
-    //   options_ref.value.splice(i, 1);
-    // }
+    options_delay.value = 0
     options_ref.value = [];
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    setTimeout(() => {
 
-      options_ref.value[i] = item;
-    }
-    const options = document.getElementsByClassName("option-item");
+      // for (let i = 0; i < options_ref.value.length; i++) {
+      //   options_ref.value.splice(i, 1);
+      // }
 
-    let i = 0;
-    for (let o of options) {
-      anime({
-        targets: o,
-        scale: 1,
-        opacity: 1,
-        duration,
-        easing,
-        delay: i,
-      });
-      i += 105;
-    }
-  }, duration);
+      // for (let i = 0; i < items.length; i++) {
+      //   const item = items[i];
+
+      //   options_ref.value[i] = item;
+      // }
+
+      options_ref.value = items
+      // const options = document.getElementsByClassName("option-item");
+      // console.log(options)
+      // let i = 0;
+      // for (let o of options) {
+      //   console.log(o)
+      //   anime({
+      //     targets: o,
+      //     scale: [.1, 1],
+      //     opacity: 1,
+      //     duration: 951,
+      //     easing,
+      //     delay: i,
+      //   });
+      //   i += 105;
+      // }
+    }, duration);
+  }, options.length * 75)
 }
-function setItems(items: Items) {
+function setItems(items_obj: Items) {
+
   const cards = document.getElementsByClassName("card-item");
   let delay = 0
   for (let c of cards) {
@@ -136,32 +184,60 @@ function setItems(items: Items) {
     delay += 75
   }
 
-  if (cards.length < 1 && !is_loading.value) {
-    const empty = document.querySelector(".empty");
-    if (empty) {
-      anime({ targets: empty, opacity: 0, easing: 'easeOutSine' })
-    };
-  } else if (cards.length < 1 && is_loading.value) {
-    const loadingEl = document.querySelector(".loading-animation");
-    anime({ targets: loadingEl, opacity: 0, easing: 'easeOutSine' });
+  const keys = Object.keys(items_obj)
+  console.log(keys)
+  items_ref.value = {}
+  for (let key of keys) {
+    items_ref.value[key] = []
   }
 
-  setTimeout(() => {
+  let allEmpty = true
+  for (let key of keys) {
+    const items = items_obj[key]
 
-    // for (let i = 0; i < items_ref.value.length; i++) {
-    //   items_ref.value.splice(i, 1);
-    // }
-    items_ref.value = []; is_loading.value = true;
-    let delay = 0;
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      item.classNames = `delay-${delay}`;
-      //@ts-ignore
-      items_ref.value.push(item);
-      delay += 35;
+    if (items.length > 0) {
+      is_loading.value = true
+      setTimeout(() => {
+        is_empty.value = false
+      }, 175)
     }
-    is_loading.value = false;
-  }, duration);
+    setTimeout(() => {
+      is_loading.value = true
+      if (cards.length < 1 && !is_loading.value) {
+        const empty = document.querySelector(".empty");
+        if (empty) {
+          anime({ targets: empty, opacity: 0, easing: 'easeOutSine' })
+        };
+      } else if (cards.length < 1 && is_loading.value) {
+        const loadingEl = document.querySelector(".loading-animation");
+        anime({ targets: loadingEl, opacity: 0, easing: 'easeOutSine' });
+      }
+
+
+      setTimeout(() => {
+
+        // for (let i = 0; i < items_ref.value.length; i++) {
+
+        //   items_ref.value.splice(i, 1);
+        // }
+        console.log('page items', items)
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+
+          item.classNames = `delay-${delay}`;
+          delay += 1;
+          if (!items_ref.value[key]) {
+            items_ref.value[key] = []
+          }
+          //@ts-ignore
+          items_ref.value[key].push(item);
+
+        }
+        is_loading.value = false;
+      }, cards.length * 95)
+    }, cards.length * 105)
+  }
+  console.log(items_ref.value)
 }
 </script>
 
@@ -170,6 +246,7 @@ function setItems(items: Items) {
   display: block;
   width: 100%;
   height: 100%;
+  overflow-y: scroll;
 }
 
 .header {
@@ -192,12 +269,13 @@ function setItems(items: Items) {
 .options-bar {
   display: flex;
   justify-content: space-between;
-  height: 15%;
+  height: 13%;
+  z-index: 5;
 }
 
 .options {
   display: flex;
-  gap: 15px;
+  gap: 41px;
   padding: 13px 19px;
 }
 
@@ -219,6 +297,28 @@ function setItems(items: Items) {
   -moz-transition: height 1s ease-in-out, left 1.5s ease-in-out;
   -o-transition: height 1s ease-in-out, left 1.5s ease-in-out;
   transition: height 1s ease-in-out, left 1.5s ease-in-out;
+}
+
+.main-cards-row {
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 41px;
+  overflow: visible;
+}
+
+.main-cards-row-header {
+  height: 15px;
+  width: 100%;
+  padding-left: 55px;
+  font-size: 15px !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: grey;
+  background-color: transparent;
+
 }
 
 .empty {

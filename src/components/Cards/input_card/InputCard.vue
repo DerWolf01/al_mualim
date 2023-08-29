@@ -5,7 +5,7 @@
       <span> {{ card.title }}</span>
     </div>
     <FancyRipple class-name="input-field full card-shadow">
-      <input :id="card.id" ref="input" class="full" type="text" :maxlength="card.max" :minlength="card.min"
+      <input :id="card.id" ref="input" class="full" :type="card.type" :maxlength="card.max" :minlength="card.min"
         :required="card.required ?? false" />
       <div ref="placeholder" class="placeholder">{{ card.placeholder }}</div>
       <div class="char-amount"><span :class="charAmountClass">{{ charAmount }}</span>/{{ card.max ??
@@ -22,6 +22,7 @@ import FancyRipple from "../../FancyRipple/FancyRipple.vue";
 import { Ref, computed, onBeforeUnmount, onMounted, ref, toRefs, watch } from "vue";
 import anime from "animejs";
 import { AlertController } from "../../Alert/alert_controller";
+import Card from "../../Card/card_class";
 
 //@ts-ignore
 const props = defineProps<{ card: InputCardConf; classNames?: string }>();
@@ -43,7 +44,7 @@ class InputEvents {
     this.addEventListeners();
   }
 
-  card: InputCardConf;
+  card: InputCardConf ;
   input: HTMLInputElement;
   placeholder: HTMLElement;
   value: string = "";

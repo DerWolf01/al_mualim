@@ -18,7 +18,7 @@ export class User extends PersonModel {
 
   public static async getUser() {
     if (!this.instance) {
-      await PageRouter.getInstance?.authenticate();
+      PageRouter.getInstance?.authenticate();
     }
     return this.instance;
   }

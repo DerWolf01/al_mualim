@@ -11,6 +11,8 @@ export enum Roles {
   ADMIN_ROLE,
 }
 
+
+
 export const PersonJsonObject: Map<string, String | Number> = new Map<
   string,
   any
@@ -28,9 +30,9 @@ export interface IPerson {
   id: number;
   name: string;
   last_name: string;
-  birthdate: string;
+  birthdate: string | Date;
   gender: Gender;
-  role: Roles;
+  role: Roles | number;
 }
 export interface PersonRequestInterface {
   id?: number;

@@ -22,7 +22,7 @@ export class InputError extends String {
   }
 }
 
-export class InputCardConf implements InputConfType {
+export class InputCardConf extends Card implements InputConfType {
   constructor(conf: InputConfType) {
     const {
       title,
@@ -36,7 +36,9 @@ export class InputCardConf implements InputConfType {
       classNames,
       onError,
       index,
+      action,
     } = conf;
+    super(conf);
     this.title = title;
     this.placeholder = placeholder;
     this.data_describer = data_describer;
@@ -48,6 +50,7 @@ export class InputCardConf implements InputConfType {
     this.type = type ?? "text";
     this.onError = onError;
     this.index = index;
+    this.action = action;
   }
   title: string;
   placeholder: string;
@@ -61,7 +64,6 @@ export class InputCardConf implements InputConfType {
   type: "text" | "password" | "email";
   onError?: (errors: InputError[]) => void;
   index?: number | undefined;
-
   /**
    * @function inputIsValid
    * @description Returns true if value is valid false if invalid.
@@ -133,6 +135,7 @@ type InputConfType = {
   id?: string;
   index?: number;
   onError?: (errors: InputError[]) => void;
+  action?: (card: Card) => Promise<void>;
 };
 
 type InputCardEvents = "onSubmit" | "onError" | "input";

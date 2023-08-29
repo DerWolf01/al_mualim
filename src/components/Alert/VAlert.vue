@@ -4,7 +4,7 @@
         <div ref="alert">{{ alert.text }}</div>
         <!-- <VIcon> -->
         <div class="full flex-center">
-            <IonIcon class="icon" style="color:#f96b05f2" :icon="warning"></IonIcon>
+            <IonIcon class="icon" style="color:var(--warning)" :icon="warning"></IonIcon>
         </div> <!-- </VIcon> -->
     </FancyRipple>
 </template>
@@ -25,7 +25,7 @@ const props = defineProps<{ alert: Alert }>()
     position: relative;
     height: fit-content !important;
     overflow: hidden;
-    background-color: #f96b0514;
+    background-color: #ffcdb262;
     /* box-shadow: #e29b2851 0 0 13px; */
     width: 100%;
     border-radius: var(--radius);

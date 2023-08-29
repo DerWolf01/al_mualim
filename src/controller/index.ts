@@ -61,7 +61,7 @@
 //     const person_data = json as IPersonWithToken;
 //     AuthController.setToken(person_data.jwt);
 //     console.log(User.initUser(json as IPerson));
-//     PageRouter.getInstance?.to("SchülerListe");
+//    PageRouter.getInstance?.to("SchülerListe");
 //   }
 
 //   static responseIsValid(

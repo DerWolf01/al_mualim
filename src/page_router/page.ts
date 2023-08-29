@@ -46,10 +46,10 @@ export abstract class Page implements IPage {
   }
 
   async getItems(): Promise<Items> {
-    return [];
+    return {};
   }
   static async getItems(): Promise<Items> {
-    return [];
+    return {};
   }
   async setItems(): Promise<void> {}
 }

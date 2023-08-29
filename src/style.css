@@ -6,7 +6,6 @@ html,
   position: relative;
 }
 
-
 .absolute {
   position: absolute;
   top: 0;
@@ -32,4 +31,82 @@ html,
 :root {
   --shadow: 0px 0px 23px 0px rgba(0, 0, 0, 0.11);
   --radius: 15px;
+  --success-shadow: 5px 7px 29px 0px #b2f2cb;
+  --success: #5af49566;
+  --success-dark: #038736f9;
+  --warning: #ffa86ad4;
+  --warning-light: #ffa86a7b;
+  --warning-dark: #f5970b;
+  --warning-shadow: 0px 0px 29px var(--warning);
+
+  --error-shadow: 5px 7px 29px var(--error);
+  --error: #ff978fb5;
+  --error-dark: #c815089e;
+}
+html,
+body {
+  overflow: hidden !important;
+}
+.notification {
+  padding: 5px 19px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 25px;
+  align-items: center;
+  position: absolute;
+  background-color: white;
+  width: 235px;
+  height: 55px;
+  top: 15px;
+  right: 19px;
+  z-index: 99;
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  transform: translate(125%, 0);
+  color: grey;
+  font-weight: 100;
+}
+
+.not-icon-wrapper {
+  display: flex;
+  width: 21px;
+  height: 21px;
+  padding: 11px 11px 11px 11px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 18px;
+}
+.not-icon-warning-wrapper {
+  background-color: var(--warning-light);
+  box-shadow: var(--warning-shadow);
+}
+
+.not-icon-error-wrapper {
+  background-color: var(--error);
+  box-shadow: var(--error-shadow);
+}
+
+.not-icon-success-wrapper {
+  background-color: var(--success);
+  box-shadow: var(--success-shadow);
+}
+
+.not-icon {
+  width: 19px;
+  height: 19px;
+}
+.not-icon-warning {
+  color: var(--warning-dark);
+  filter: drop-shadow(0px 0px 15px var(--warning));
+}
+.not-icon-error {
+  color: var(--error-dark);
+  filter: drop-shadow(0 0 9px var(--error));
+}
+.not-icon-success {
+  color: var(--success-dark);
+  filter: drop-shadow(0 0 9px var(--success));
+}
+.not-icon-plain {
+  color: grey;
 }

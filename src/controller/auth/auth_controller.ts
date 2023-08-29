@@ -24,9 +24,7 @@ export class AuthController {
 
   static async authenthicate(): Promise<User | void> {
     const res = await RequestController.get(ServerPaths.AUTHENTICATE);
-    console.log(res);
     const res_json = await res?.json();
-    console.log(res_json);
 
     return User.getUser();
   }
@@ -48,12 +46,10 @@ export class AuthController {
     //   return;
     // }
     const person_data = json as IPersonWithToken;
-    console.log('person data json format')
-    console.log(person_data)
+   
     AuthController.setToken(person_data.jwt);
-    console.log(`token: ${person_data.jwt}` )
+  
     const user = User.initUser(json as IPerson);
-    console.log(user)
     PageRouter.getInstance?.to("SchülerListe");
     return user;
   }

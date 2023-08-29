@@ -1,18 +1,31 @@
 import { Page } from "./page";
 import { PageOption } from "../components/Page/option/page_option";
 import { StudentPage } from "../pages/students/students_list/students_list";
-import { AddPersonPage } from "../pages/persons/add_person/add_person";
+import {
+  AddPersonPage,
+  CreatePersonPage,
+} from "../pages/persons/add_person/add_person";
 import { LoginPage } from "../pages/auth/login";
-import { Items } from "./types";
+import {
+  Items,
+  PageRouterEventCallback,
+  PageRouterEvents,
+  routes,
+} from "./types";
 import { Controller } from "../controller";
 import { AuthController } from "../controller/auth/auth_controller";
 import { CoursesPage } from "../pages/course/courses_page";
-
-export type routes = "SchülerListe" | "AddPersonPage" | "Login" | "Courses";
+import { User } from "../models/active_user";
+import { SubPage } from "./sub_page";
+import { NavigationController } from "../controller/navigation/navigation_controller";
+import { AddCoursePage } from "../pages/course/add_course_page";
+import { Roles } from "../models/person_model/types";
+import { CourseModel } from "../models/course/course_model";
 
 export class PageRouter {
   private constructor(page: Page) {
     this.page = page;
+    this.history.push(page);
   }
 
   private static instance?: PageRouter;
@@ -24,9 +37,11 @@ export class PageRouter {
     return this.instance;
   }
   page: Page;
-  items: Items = [];
+  items: Items = {};
   beforeNavigationCallbacks: PageRouterEventCallback[] = [];
   afterNavigationCallbacks: PageRouterEventCallback[] = [];
+  history: PageRouterHistory = new PageRouterHistory();
+  routing = false;
   addEventListener(type: PageRouterEvents, callback: PageRouterEventCallback) {
     switch (type) {
       case "beforeChange":
@@ -50,7 +65,8 @@ export class PageRouter {
     return items;
   }
   async setItems(): Promise<void> {
-    this.items = await this.page.getItems();
+    await this.page.setItems();
+    this.items = this.page.items;
   }
 
   async authenticate(): Promise<void> {
@@ -65,29 +81,54 @@ export class PageRouter {
   static get getInstance(): PageRouter | undefined {
     return PageRouter.instance;
   }
-  async to(page_name: routes): Promise<Items> {
-    this.runBeforeCallbacks();
-    this.page = await PageRouter.getPageByName(page_name);
 
+  // routing functions
+  async to(page_name: routes | Page, anonym: boolean = false): Promise<Items> {
+    this.routing = true;
+    if (!anonym) {
+      this.history.register(page_name);
+    }
+    if (page_name instanceof SubPage) {
+      NavigationController.backIcon();
+    } else {
+      NavigationController.stairsIcon();
+    }
+    await this.runBeforeCallbacks();
+    if (page_name instanceof Page) {
+      this.page = page_name;
+    } else {
+      this.page = await PageRouter.getPageByName(page_name);
+    }
     await this.setItems();
 
     await this.runAfterCallbacks();
+    this.routing = false;
+    // this.history.normalize();
+
     return this.items;
   }
 
+  async backward() {
+    await this.history.backward();
+  }
+  async forward() {
+    await this.history.forward();
+  }
   static async getPageByName(name?: routes): Promise<Page> {
-    if (!localStorage.getItem("token")) {
+    if (!User.getAuthStatus()) {
       return await LoginPage.init();
     }
     switch (name) {
-      case "SchülerListe":
-        return await StudentPage.init();
-      case "AddPersonPage":
-        return await AddPersonPage.init();
+      // case "SchülerListe":
+      //   return await StudentPage.init();
+      // case "AddPersonPage":
+      //   return await AddPersonPage.init();
       case "Login":
         return await LoginPage.init();
       case "Courses":
-        await CoursesPage.init();
+        return await CoursesPage.init();
+      case "AddCoursePage":
+        return new AddCoursePage();
     }
     return await CoursesPage.init();
   }
@@ -102,38 +143,62 @@ export class PageRouter {
     }
     return;
   }
+  async addPersonPage(addTo: CourseModel) {
+    await this.to(await AddPersonPage.init(addTo));
+  }
+  async createPersonPage(role?: Roles.STUDENT_ROLE | Roles.TEACHER_ROLE) {
+    await this.to(await CreatePersonPage.init(role));
+  }
 }
 
-type PageRouterEvents = "beforeChange" | "afterChange";
-type PageRouterEventCallback = (page: Page) => Promise<void>;
-// export default class PageRouter {
-//   private constructor() {}
+export class PageRouterHistory extends Array<routes | Page> {
+  constructor() {
+    super();
+  }
 
-//   private static instance = new PageRouter();
+  activeIndex: number = 0;
+  async register(page: routes | Page): Promise<void> {
+    // this.normalize();
 
-//   static getInstance() {
-//     if (!this.instance) {
-//       this.instance = new PageRouter();
-//     }
-//     return this.instance;
-//   }
+    this.push(await this.getPage(page));
+    this.activeIndex++;
+  }
+  normalize() {
+    this.activeIndex = this.getLength();
+  }
+  async backward(anonym = true) {
+    console.log(this.activeIndex);
+    if (this.activeIndex == 0) {
+      return;
+    }
+    // while (PageRouter.getInstance?.routing) {
+    //   console.log("routing");
+    //   continue;
+    // }
+    this.activeIndex--;
+    console.log(this[this.activeIndex]);
+    await PageRouter.getInstance?.to(this[this.activeIndex], anonym);
+  }
+  async forward(anonym = true) {
+    console.log(this.getLength() - 1 == this.activeIndex);
+    if (this.getLength() - 1 == this.activeIndex) {
+      return;
+    }
 
-//   static pages: Pages = new Pages();
-//   static active: string = "Schülerliste";
+    this.activeIndex++;
+    await PageRouter.getInstance?.to(this[this.activeIndex], anonym);
+  }
 
-//   static to(page: string): void {
-//     PageRouter.active = page;
-//     PageRouter.pages.get(page)?.init()
-//   }
-
-//   public static getPageTitle(): string {
-//     return this.pages.get(this.active)?.title ?? "page";
-//   }
-//   public static getItems(): Array<Card> {
-//     return this.pages.get(this.active)?.items ?? [];
-//   }
-
-//   static addPage(page: Page): void {
-//     this.pages.set(page.title, page);
-//   }
-// }
+  async getPage(page: routes | Page): Promise<Page> {
+    if (page instanceof Page) {
+      return page;
+    }
+    return await PageRouter.getPageByName(page);
+  }
+  getLastPage() {
+    return this[this.getLength() - 1];
+  }
+  getLength() {
+    return this.length;
+  }
+}

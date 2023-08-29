@@ -7,7 +7,7 @@ import { PageRouter } from "../../../page_router/page_router";
 import IPage from "../../../page_router/types";
 
 export class StudentPage extends Page implements IPage {
-  constructor(items: StudentCard[]) {
+  constructor(items: Items) {
     super("Schülerliste", items);
   }
 
@@ -20,7 +20,7 @@ export class StudentPage extends Page implements IPage {
   static options = [
     new PageOption("add", {
       action: async (a) => {
-        await PageRouter.getInstance?.to("AddPersonPage");
+       PageRouter.getInstance?.to("AddPersonPage");
       },
     }),
     new PageOption("search"),

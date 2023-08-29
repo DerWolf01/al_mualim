@@ -7,37 +7,38 @@ import { Items } from "../../page_router/types";
 import { FormPage } from "../form_page/page";
 
 export class LoginPage extends FormPage {
-  constructor(items: Items = []) {
+  constructor(items: Items = {}) {
     super("Login", items, [], async (data) => {
-      console.log(data);
       await AuthController.login(data);
     });
   }
 
   static async init(): Promise<LoginPage> {
-    var items = [
-      new InputCardConf({
-        index: 1,
-        max: 320,
-        min: 5,
-        required: true,
-        title: "Email Adresse",
-        placeholder: "max@mubarek.de",
-        data_describer: "email",
-        onError: (e) => {
-          console.log(e);
-        },
-      }),
-      new InputCardConf({
-        index: 2,
-        required: true,
-        min: 7,
-        max: 25,
-        title: "Password",
-        placeholder: "Aci biber, 1234567...",
-        data_describer: "password",
-      }),
-    ];
+    var items = {
+      none: [
+        new InputCardConf({
+          index: 1,
+          max: 320,
+          min: 5,
+          required: true,
+          title: "Email Adresse",
+          placeholder: "max@mubarek.de",
+          data_describer: "email",
+          onError: (e) => {
+            console.log(e);
+          },
+        }),
+        new InputCardConf({
+          index: 2,
+          required: true,
+          min: 7,
+          max: 25,
+          title: "Password",
+          placeholder: "Aci biber, 1234567...",
+          data_describer: "password",
+        }),
+      ],
+    };
     return new LoginPage(items);
   }
   async getItems(): Promise<Items> {
@@ -48,10 +49,10 @@ export class LoginPage extends FormPage {
     return [
       new PageOption("logInOutline", {
         action: (e: PointerEvent) => {
-          this.items.forEach((item) => {
-            if (item instanceof InputCardConf) {
-              console.log(item.getInputValue(), item.data_describer);
-            }
+          Object.values(this.items).forEach((item) => {
+            // if (item instanceof InputCardConf) {
+            //   console.log(item.getInputValue(), item.data_describer);
+            // }
           });
           this.submitForm();
         },

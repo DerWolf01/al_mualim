@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-animation full flex-center">
+  <div ref="grid" class="loading-animation full flex-center">
     <div class="loading full relative">
       <div v-for="s in loadingAnimation.getSquareAmount()" :key="s" class="grid-item square"></div>
     </div>
@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import anime from "animejs";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const props = withDefaults(defineProps<LoadingAnimationType>(), {
   color: "blue",
@@ -55,9 +55,11 @@ const loadingAnimation = new LoadingAnimation({
 function getWidthOrHeight(): string {
   return loadingAnimation.getWidthOrHeight();
 }
-
+const grid = ref()
 onMounted(() => {
+
   loadingAnimation.animate();
+  anime({ targets: grid.value, opacity: 1, easing: "easeInSine", duration: 650 })
 });
 </script>
 <style scoped>
@@ -72,6 +74,7 @@ onMounted(() => {
 
 .loading-animation {
   height: 75px;
+  opacity: 0;
 }
 
 .grid-item {
